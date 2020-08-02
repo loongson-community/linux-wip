@@ -576,6 +576,10 @@
 # define cpu_has_gsexcex	__opt(MIPS_CPU_GSEXCEX)
 #endif
 
+#ifndef cpu_has_extimer
+# define cpu_has_extimer	__opt(MIPS_CPU_EXTIMER)
+#endif
+
 #ifdef CONFIG_SMP
 /*
  * Some systems share FTLB RAMs between threads within a core (siblings in

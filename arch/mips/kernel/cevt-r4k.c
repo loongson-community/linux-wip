@@ -15,6 +15,8 @@
 
 #include <asm/time.h>
 #include <asm/cevt-r4k.h>
+#include <asm/cpu-features.h>
+#include <asm/mipsregs.h>
 
 static int mips_next_event(unsigned long delta,
 			   struct clock_event_device *evt)
@@ -302,6 +304,24 @@ core_initcall(r4k_register_cpufreq_notifier);
 
 #endif /* !CONFIG_CPU_FREQ */
 
+#ifdef CONFIG_CPU_LOONGSON64
+static int c0_compare_int_enable(struct clock_event_device *cd)
+{
+	if (cpu_has_extimer)
+		set_c0_config6(LOONGSON_CONF6_INTIMER);
+
+	return 0;
+}
+
+static int c0_compare_int_disable(struct clock_event_device *cd)
+{
+	if (cpu_has_extimer)
+		clear_c0_config6(LOONGSON_CONF6_INTIMER);
+
+	return 0;
+}
+#endif
+
 int r4k_clockevent_percpu_init(int cpu)
 {
 	struct clock_event_device *cd;
@@ -329,6 +349,11 @@ int r4k_clockevent_percpu_init(int cpu)
 	cd->cpumask		= cpumask_of(cpu);
 	cd->set_next_event	= mips_next_event;
 	cd->event_handler	= mips_event_handler;
+
+#ifdef CONFIG_CPU_LOONGSON64
+	cd->set_state_oneshot = c0_compare_int_enable;
+	cd->set_state_shutdown = c0_compare_int_disable;
+#endif
 
 	clockevents_config_and_register(cd, mips_hpt_frequency, min_delta, 0x7fffffff);
 
