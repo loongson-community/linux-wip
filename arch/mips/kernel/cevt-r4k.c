@@ -142,6 +142,15 @@ irqreturn_t c0_compare_interrupt(int irq, void *dev_id)
 	if (handle_perf_irq(r2))
 		return IRQ_HANDLED;
 
+	cd = &per_cpu(mips_clockevent_device, cpu);
+	/*
+	 * If the clockevent have not enabled, then no need to check the rest.
+	 * Some platforms may have shared Cause.TI, bailing out here can
+	 * give another clock device a chance.
+	 */
+	if (clockevent_state_detached(cd) || clockevent_state_shutdown(cd))
+		return IRQ_NONE;
+
 	/*
 	 * The same applies to performance counter interrupts.	But with the
 	 * above we now know that the reason we got here must be a timer
@@ -150,7 +159,6 @@ irqreturn_t c0_compare_interrupt(int irq, void *dev_id)
 	if (!r2 || (read_c0_cause() & CAUSEF_TI)) {
 		/* Clear Count/Compare Interrupt */
 		write_c0_compare(read_c0_compare());
-		cd = &per_cpu(mips_clockevent_device, cpu);
 		cd->event_handler(cd);
 
 		return IRQ_HANDLED;
