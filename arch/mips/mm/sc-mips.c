@@ -173,7 +173,7 @@ static int __init mips_sc_probe_cm3(void)
 
 	if (c->scache.linesz) {
 		c->scache.flags &= ~MIPS_CACHE_NOT_PRESENT;
-		c->options |= MIPS_CPU_INCLUSIVE_CACHES;
+		set_cpu_opt(c, MIPS_CPU_INCLUSIVE_CACHES);
 		return 1;
 	}
 

@@ -68,10 +68,9 @@ static void decode_loongson_config6(struct cpuinfo_mips *c)
 static void patch_cpucfg_sel1(struct cpuinfo_mips *c)
 {
 	u64 ases = c->ases;
-	u64 options = c->options;
 	u32 data = c->loongson3_cpucfg_data[0];
 
-	if (options & MIPS_CPU_FPU) {
+	if (cpu_has_fpu) {
 		data |= LOONGSON_CFG1_FP;
 		data |= get_loongson_fprev(c) << LOONGSON_CFG1_FPREV_OFFSET;
 	}
@@ -86,14 +85,13 @@ static void patch_cpucfg_sel1(struct cpuinfo_mips *c)
 static void patch_cpucfg_sel2(struct cpuinfo_mips *c)
 {
 	u64 ases = c->ases;
-	u64 options = c->options;
 	u32 data = c->loongson3_cpucfg_data[1];
 
 	if (ases & MIPS_ASE_LOONGSON_EXT)
 		data |= LOONGSON_CFG2_LEXT1;
 	if (ases & MIPS_ASE_LOONGSON_EXT2)
 		data |= LOONGSON_CFG2_LEXT2;
-	if (options & MIPS_CPU_LDPTE)
+	if (cpu_has_ldpte)
 		data |= LOONGSON_CFG2_LSPW;
 
 	if (ases & MIPS_ASE_VZ)

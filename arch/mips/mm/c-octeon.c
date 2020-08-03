@@ -192,7 +192,7 @@ static void probe_octeon(void)
 		dcache_size =
 			c->dcache.sets * c->dcache.ways * c->dcache.linesz;
 		c->dcache.waybit = ffs(dcache_size / c->dcache.ways) - 1;
-		c->options |= MIPS_CPU_PREFETCH;
+		set_cpu_opt(c, MIPS_CPU_PREFETCH);
 		break;
 
 	case CPU_CAVIUM_OCTEON2:
@@ -206,7 +206,7 @@ static void probe_octeon(void)
 		c->dcache.ways = 32;
 		c->dcache.sets = 8;
 		dcache_size = c->dcache.sets * c->dcache.ways * c->dcache.linesz;
-		c->options |= MIPS_CPU_PREFETCH;
+		set_cpu_opt(c, MIPS_CPU_PREFETCH);
 		break;
 
 	case CPU_CAVIUM_OCTEON3:
@@ -220,7 +220,7 @@ static void probe_octeon(void)
 		c->dcache.ways = 32;
 		c->dcache.sets = 8;
 		dcache_size = c->dcache.sets * c->dcache.ways * c->dcache.linesz;
-		c->options |= MIPS_CPU_PREFETCH;
+		set_cpu_opt(c, MIPS_CPU_PREFETCH);
 		break;
 
 	default:

@@ -119,7 +119,7 @@ void mips_probe_watch_registers(struct cpuinfo_mips *c)
 {
 	unsigned int t;
 
-	if ((c->options & MIPS_CPU_WATCH) == 0)
+	if (!cpu_has_watch)
 		return;
 	/*
 	 * Check which of the I,R and W bits are supported, then

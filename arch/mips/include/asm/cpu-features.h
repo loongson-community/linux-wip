@@ -16,7 +16,7 @@
 
 #define __ase(ase)			(cpu_data[0].ases & (ase))
 #define __isa(isa)			(cpu_data[0].isa_level & (isa))
-#define __opt(opt)			(cpu_data[0].options & (opt))
+#define __opt(opt)			(test_cpu_opt(&boot_cpu_data, opt))
 
 /*
  * Check if MIPS_ISA_REV is >= isa *and* an option or ASE is detected during
@@ -129,8 +129,8 @@
 /* Don't override `cpu_has_fpu' to 1 or the "nofpu" option won't work.  */
 #ifndef cpu_has_fpu
 # ifdef CONFIG_MIPS_FP_SUPPORT
-#  define cpu_has_fpu		(current_cpu_data.options & MIPS_CPU_FPU)
-#  define raw_cpu_has_fpu	(raw_current_cpu_data.options & MIPS_CPU_FPU)
+#  define cpu_has_fpu		test_cpu_opt(&current_cpu_data, MIPS_CPU_FPU)
+#  define raw_cpu_has_fpu	test_cpu_opt(&raw_current_cpu_data, MIPS_CPU_FPU)
 # else
 #  define cpu_has_fpu		0
 #  define raw_cpu_has_fpu	0
@@ -652,6 +652,9 @@
 /*
  * Guest capabilities
  */
+
+#define __gopt(opt)			(test_cpu_gopt(&boot_cpu_data, opt))
+
 #ifndef cpu_guest_has_conf1
 #define cpu_guest_has_conf1	(cpu_data[0].guest.conf & (1 << 1))
 #endif
@@ -674,31 +677,31 @@
 #define cpu_guest_has_conf7	(cpu_data[0].guest.conf & (1 << 7))
 #endif
 #ifndef cpu_guest_has_fpu
-#define cpu_guest_has_fpu	(cpu_data[0].guest.options & MIPS_CPU_FPU)
+#define cpu_guest_has_fpu	__gopt(MIPS_CPU_FPU)
 #endif
 #ifndef cpu_guest_has_watch
-#define cpu_guest_has_watch	(cpu_data[0].guest.options & MIPS_CPU_WATCH)
+#define cpu_guest_has_watch	__gopt(MIPS_CPU_WATCH)
 #endif
 #ifndef cpu_guest_has_contextconfig
-#define cpu_guest_has_contextconfig (cpu_data[0].guest.options & MIPS_CPU_CTXTC)
+#define cpu_guest_has_contextconfig __gopt(MIPS_CPU_CTXTC)
 #endif
 #ifndef cpu_guest_has_segments
-#define cpu_guest_has_segments	(cpu_data[0].guest.options & MIPS_CPU_SEGMENTS)
+#define cpu_guest_has_segments	__gopt(MIPS_CPU_SEGMENTS)
 #endif
 #ifndef cpu_guest_has_badinstr
-#define cpu_guest_has_badinstr	(cpu_data[0].guest.options & MIPS_CPU_BADINSTR)
+#define cpu_guest_has_badinstr	__gopt(MIPS_CPU_BADINSTR)
 #endif
 #ifndef cpu_guest_has_badinstrp
-#define cpu_guest_has_badinstrp	(cpu_data[0].guest.options & MIPS_CPU_BADINSTRP)
+#define cpu_guest_has_badinstrp	__gopt(MIPS_CPU_BADINSTRP)
 #endif
 #ifndef cpu_guest_has_htw
-#define cpu_guest_has_htw	(cpu_data[0].guest.options & MIPS_CPU_HTW)
+#define cpu_guest_has_htw	__gopt(MIPS_CPU_HTW)
 #endif
 #ifndef cpu_guest_has_ldpte
-#define cpu_guest_has_ldpte	(cpu_data[0].guest.options & MIPS_CPU_LDPTE)
+#define cpu_guest_has_ldpte	__gopt(MIPS_CPU_LDPTE)
 #endif
 #ifndef cpu_guest_has_mvh
-#define cpu_guest_has_mvh	(cpu_data[0].guest.options & MIPS_CPU_MVH)
+#define cpu_guest_has_mvh	__gopt(MIPS_CPU_MVH)
 #endif
 #ifndef cpu_guest_has_msa
 #define cpu_guest_has_msa	(cpu_data[0].guest.ases & MIPS_ASE_MSA)
@@ -707,38 +710,41 @@
 #define cpu_guest_has_kscr(n)	(cpu_data[0].guest.kscratch_mask & (1u << (n)))
 #endif
 #ifndef cpu_guest_has_rw_llb
-#define cpu_guest_has_rw_llb	(cpu_has_mips_r6 || (cpu_data[0].guest.options & MIPS_CPU_RW_LLB))
+#define cpu_guest_has_rw_llb	(cpu_has_mips_r6 || __gopt(MIPS_CPU_RW_LLB))
 #endif
 #ifndef cpu_guest_has_perf
-#define cpu_guest_has_perf	(cpu_data[0].guest.options & MIPS_CPU_PERF)
+#define cpu_guest_has_perf	__gopt(MIPS_CPU_PERF)
 #endif
 #ifndef cpu_guest_has_maar
-#define cpu_guest_has_maar	(cpu_data[0].guest.options & MIPS_CPU_MAAR)
+#define cpu_guest_has_maar	__gopt(MIPS_CPU_MAAR)
 #endif
 #ifndef cpu_guest_has_userlocal
-#define cpu_guest_has_userlocal	(cpu_data[0].guest.options & MIPS_CPU_ULRI)
+#define cpu_guest_has_userlocal	__gopt(MIPS_CPU_ULRI)
 #endif
 
 /*
  * Guest dynamic capabilities
  */
+
+#define __gopt_dyn(opt)		(test_cpu_gopt_dyn(&boot_cpu_data, opt))
+
 #ifndef cpu_guest_has_dyn_fpu
-#define cpu_guest_has_dyn_fpu	(cpu_data[0].guest.options_dyn & MIPS_CPU_FPU)
+#define cpu_guest_has_dyn_fpu	__gopt_dyn(MIPS_CPU_FPU)
 #endif
 #ifndef cpu_guest_has_dyn_watch
-#define cpu_guest_has_dyn_watch	(cpu_data[0].guest.options_dyn & MIPS_CPU_WATCH)
+#define cpu_guest_has_dyn_watch	__gopt_dyn(MIPS_CPU_WATCH)
 #endif
 #ifndef cpu_guest_has_dyn_contextconfig
-#define cpu_guest_has_dyn_contextconfig (cpu_data[0].guest.options_dyn & MIPS_CPU_CTXTC)
+#define cpu_guest_has_dyn_contextconfig __gopt_dyn(MIPS_CPU_CTXTC)
 #endif
 #ifndef cpu_guest_has_dyn_perf
-#define cpu_guest_has_dyn_perf	(cpu_data[0].guest.options_dyn & MIPS_CPU_PERF)
+#define cpu_guest_has_dyn_perf	__gopt_dyn(MIPS_CPU_PERF)
 #endif
 #ifndef cpu_guest_has_dyn_msa
 #define cpu_guest_has_dyn_msa	(cpu_data[0].guest.ases_dyn & MIPS_ASE_MSA)
 #endif
 #ifndef cpu_guest_has_dyn_maar
-#define cpu_guest_has_dyn_maar	(cpu_data[0].guest.options_dyn & MIPS_CPU_MAAR)
+#define cpu_guest_has_dyn_maar	__gopt_dyn(MIPS_CPU_MAAR)
 #endif
 
 #endif /* __ASM_CPU_FEATURES_H */

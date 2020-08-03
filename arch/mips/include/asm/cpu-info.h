@@ -15,6 +15,7 @@
 #include <linux/cache.h>
 #include <linux/types.h>
 
+#include <asm/cpu.h>
 #include <asm/mipsregs.h>
 
 /*
@@ -32,8 +33,8 @@ struct cache_desc {
 struct guest_info {
 	unsigned long		ases;
 	unsigned long		ases_dyn;
-	unsigned long long	options;
-	unsigned long long	options_dyn;
+	unsigned long long	options[MIPS_CPU_OPTS_ULL_N];
+	unsigned long long	options_dyn[MIPS_CPU_OPTS_ULL_N];
 	int			tlbsize;
 	u8			conf;
 	u8			kscratch_mask;
@@ -59,7 +60,7 @@ struct cpuinfo_mips {
 	 * Capability and feature descriptor structure for MIPS CPU
 	 */
 	unsigned long		ases;
-	unsigned long long	options;
+	unsigned long long	options[MIPS_CPU_OPTS_ULL_N];
 	unsigned int		udelay_val;
 	unsigned int		processor_id;
 	unsigned int		fpu_id;
@@ -120,6 +121,21 @@ extern struct cpuinfo_mips cpu_data[];
 #define current_cpu_data cpu_data[smp_processor_id()]
 #define raw_current_cpu_data cpu_data[raw_smp_processor_id()]
 #define boot_cpu_data cpu_data[0]
+
+#define test_cpu_opt(c, bit)						\
+	 test_bit(bit, (unsigned long *)&((c)->options))
+#define set_cpu_opt(c, bit)	set_bit(bit, (unsigned long *)&((c)->options))
+#define clear_cpu_opt(c, bit)	clear_bit(bit, (unsigned long *)&((c)->options))
+
+#define test_cpu_gopt(c, bit)						\
+	 test_bit(bit, (unsigned long *)(&(c)->guest.options))
+#define set_cpu_gopt(c, bit)	set_bit(bit, (unsigned long *)&((c)->guest.options))
+#define clear_cpu_gopt(c, bit)	clear_bit(bit, (unsigned long *)&((c)->guest.options))
+
+#define test_cpu_gopt_dyn(c, bit)						\
+	 test_bit(bit, (unsigned long *)&((c)->guest.options_dyn))
+#define set_cpu_gopt_dyn(c, bit)	set_bit(bit, (unsigned long *)&((c)->guest.options_dyn))
+#define clear_cpu_gopt_dyn(c, bit)	clear_bit(bit, (unsigned long *)&((c)->guest.options_dyn))
 
 extern void cpu_probe(void);
 extern void cpu_report(void);

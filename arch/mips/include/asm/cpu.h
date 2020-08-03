@@ -335,8 +335,6 @@ enum cpu_type_enum {
 	CPU_LAST
 };
 
-#endif /* !__ASSEMBLY */
-
 /*
  * ISA Level encodings
  *
@@ -363,73 +361,77 @@ enum cpu_type_enum {
 /*
  * CPU Option encodings
  */
-#define MIPS_CPU_TLB		BIT_ULL( 0)	/* CPU has TLB */
-#define MIPS_CPU_4KEX		BIT_ULL( 1)	/* "R4K" exception model */
-#define MIPS_CPU_3K_CACHE	BIT_ULL( 2)	/* R3000-style caches */
-#define MIPS_CPU_4K_CACHE	BIT_ULL( 3)	/* R4000-style caches */
-#define MIPS_CPU_TX39_CACHE	BIT_ULL( 4)	/* TX3900-style caches */
-#define MIPS_CPU_FPU		BIT_ULL( 5)	/* CPU has FPU */
-#define MIPS_CPU_32FPR		BIT_ULL( 6)	/* 32 dbl. prec. FP registers */
-#define MIPS_CPU_COUNTER	BIT_ULL( 7)	/* Cycle count/compare */
-#define MIPS_CPU_WATCH		BIT_ULL( 8)	/* watchpoint registers */
-#define MIPS_CPU_DIVEC		BIT_ULL( 9)	/* dedicated interrupt vector */
-#define MIPS_CPU_VCE		BIT_ULL(10)	/* virt. coherence conflict possible */
-#define MIPS_CPU_CACHE_CDEX_P	BIT_ULL(11)	/* Create_Dirty_Exclusive CACHE op */
-#define MIPS_CPU_CACHE_CDEX_S	BIT_ULL(12)	/* ... same for seconary cache ... */
-#define MIPS_CPU_MCHECK		BIT_ULL(13)	/* Machine check exception */
-#define MIPS_CPU_EJTAG		BIT_ULL(14)	/* EJTAG exception */
-#define MIPS_CPU_NOFPUEX	BIT_ULL(15)	/* no FPU exception */
-#define MIPS_CPU_LLSC		BIT_ULL(16)	/* CPU has ll/sc instructions */
-#define MIPS_CPU_INCLUSIVE_CACHES BIT_ULL(17)	/* P-cache subset enforced */
-#define MIPS_CPU_PREFETCH	BIT_ULL(18)	/* CPU has usable prefetch */
-#define MIPS_CPU_VINT		BIT_ULL(19)	/* CPU supports MIPSR2 vectored interrupts */
-#define MIPS_CPU_VEIC		BIT_ULL(20)	/* CPU supports MIPSR2 external interrupt controller mode */
-#define MIPS_CPU_ULRI		BIT_ULL(21)	/* CPU has ULRI feature */
-#define MIPS_CPU_PCI		BIT_ULL(22)	/* CPU has Perf Ctr Int indicator */
-#define MIPS_CPU_RIXI		BIT_ULL(23)	/* CPU has TLB Read/eXec Inhibit */
-#define MIPS_CPU_MICROMIPS	BIT_ULL(24)	/* CPU has microMIPS capability */
-#define MIPS_CPU_TLBINV		BIT_ULL(25)	/* CPU supports TLBINV/F */
-#define MIPS_CPU_SEGMENTS	BIT_ULL(26)	/* CPU supports Segmentation Control registers */
-#define MIPS_CPU_EVA		BIT_ULL(27)	/* CPU supports Enhanced Virtual Addressing */
-#define MIPS_CPU_HTW		BIT_ULL(28)	/* CPU support Hardware Page Table Walker */
-#define MIPS_CPU_RIXIEX		BIT_ULL(29)	/* CPU has unique exception codes for {Read, Execute}-Inhibit exceptions */
-#define MIPS_CPU_MAAR		BIT_ULL(30)	/* MAAR(I) registers are present */
-#define MIPS_CPU_FRE		BIT_ULL(31)	/* FRE & UFE bits implemented */
-#define MIPS_CPU_RW_LLB		BIT_ULL(32)	/* LLADDR/LLB writes are allowed */
-#define MIPS_CPU_LPA		BIT_ULL(33)	/* CPU supports Large Physical Addressing */
-#define MIPS_CPU_CDMM		BIT_ULL(34)	/* CPU has Common Device Memory Map */
-#define MIPS_CPU_BP_GHIST	BIT_ULL(35)	/* R12K+ Branch Prediction Global History */
-#define MIPS_CPU_SP		BIT_ULL(36)	/* Small (1KB) page support */
-#define MIPS_CPU_FTLB		BIT_ULL(37)	/* CPU has Fixed-page-size TLB */
-#define MIPS_CPU_NAN_LEGACY	BIT_ULL(38)	/* Legacy NaN implemented */
-#define MIPS_CPU_NAN_2008	BIT_ULL(39)	/* 2008 NaN implemented */
-#define MIPS_CPU_VP		BIT_ULL(40)	/* MIPSr6 Virtual Processors (multi-threading) */
-#define MIPS_CPU_LDPTE		BIT_ULL(41)	/* CPU has ldpte/lddir instructions */
-#define MIPS_CPU_MVH		BIT_ULL(42)	/* CPU supports MFHC0/MTHC0 */
-#define MIPS_CPU_EBASE_WG	BIT_ULL(43)	/* CPU has EBase.WG */
-#define MIPS_CPU_BADINSTR	BIT_ULL(44)	/* CPU has BadInstr register */
-#define MIPS_CPU_BADINSTRP	BIT_ULL(45)	/* CPU has BadInstrP register */
-#define MIPS_CPU_CTXTC		BIT_ULL(46)	/* CPU has [X]ConfigContext registers */
-#define MIPS_CPU_PERF		BIT_ULL(47)	/* CPU has MIPS performance counters */
-#define MIPS_CPU_GUESTCTL0EXT	BIT_ULL(48)	/* CPU has VZ GuestCtl0Ext register */
-#define MIPS_CPU_GUESTCTL1	BIT_ULL(49)	/* CPU has VZ GuestCtl1 register */
-#define MIPS_CPU_GUESTCTL2	BIT_ULL(50)	/* CPU has VZ GuestCtl2 register */
-#define MIPS_CPU_GUESTID	BIT_ULL(51)	/* CPU uses VZ ASE GuestID feature */
-#define MIPS_CPU_DRG		BIT_ULL(52)	/* CPU has VZ Direct Root to Guest (DRG) */
-#define MIPS_CPU_UFR		BIT_ULL(53)	/* CPU supports User mode FR switching */
-#define MIPS_CPU_SHARED_FTLB_RAM \
-				BIT_ULL(54)	/* CPU shares FTLB RAM with another */
-#define MIPS_CPU_SHARED_FTLB_ENTRIES \
-				BIT_ULL(55)	/* CPU shares FTLB entries with another */
-#define MIPS_CPU_MT_PER_TC_PERF_COUNTERS \
-				BIT_ULL(56)	/* CPU has perf counters implemented per TC (MIPSMT ASE) */
-#define MIPS_CPU_MMID		BIT_ULL(57)	/* CPU supports MemoryMapIDs */
-#define MIPS_CPU_MM_SYSAD	BIT_ULL(58)	/* CPU supports write-through SysAD Valid merge */
-#define MIPS_CPU_MM_FULL	BIT_ULL(59)	/* CPU supports write-through full merge */
-#define MIPS_CPU_MAC_2008_ONLY	BIT_ULL(60)	/* CPU Only support MAC2008 Fused multiply-add instruction */
-#define MIPS_CPU_FTLBPAREX	BIT_ULL(61)	/* CPU has FTLB parity exception */
-#define MIPS_CPU_GSEXCEX	BIT_ULL(62)	/* CPU has GSExc exception */
-#define MIPS_CPU_EXTIMER	BIT_ULL(63)	/* CPU has External Timer (Loongson) */
+
+enum mips_cpu_options {
+	MIPS_CPU_TLB = 0,	/* CPU has TLB */
+	MIPS_CPU_4KEX,		/* "R4K" exception model */
+	MIPS_CPU_3K_CACHE,	/* R3000-style caches */
+	MIPS_CPU_4K_CACHE,	/* R4000-style caches */
+	MIPS_CPU_TX39_CACHE,	/* TX3900-style caches */
+	MIPS_CPU_FPU,		/* CPU has FPU */
+	MIPS_CPU_32FPR,		/* 32 dbl. prec. FP registers */
+	MIPS_CPU_COUNTER,	/* Cycle count/compare */
+	MIPS_CPU_WATCH,		/* watchpoint registers */
+	MIPS_CPU_DIVEC,		/* dedicated interrupt vector */
+	MIPS_CPU_VCE,		/* virt. coherence conflict possible */
+	MIPS_CPU_CACHE_CDEX_P,	/* Create_Dirty_Exclusive CACHE op */
+	MIPS_CPU_CACHE_CDEX_S,	/* ... same for seconary cache ... */
+	MIPS_CPU_MCHECK,	/* Machine check exception */
+	MIPS_CPU_EJTAG,		/* EJTAG exception */
+	MIPS_CPU_NOFPUEX,	/* no FPU exception */
+	MIPS_CPU_LLSC,		/* CPU has ll/sc instructions */
+	MIPS_CPU_INCLUSIVE_CACHES,	/* P-cache subset enforced */
+	MIPS_CPU_PREFETCH,	/* CPU has usable prefetch */
+	MIPS_CPU_VINT,		/* CPU supports MIPSR2 vectored interrupts */
+	MIPS_CPU_VEIC,		/* CPU supports MIPSR2 external interrupt controller mode */
+	MIPS_CPU_ULRI,		/* CPU has ULRI feature */
+	MIPS_CPU_PCI,		/* CPU has Perf Ctr Int indicator */
+	MIPS_CPU_RIXI,		/* CPU has TLB Read/eXec Inhibit */
+	MIPS_CPU_MICROMIPS,	/* CPU has microMIPS capability */
+	MIPS_CPU_TLBINV,	/* CPU supports TLBINV/F */
+	MIPS_CPU_SEGMENTS,	/* CPU supports Segmentation Control registers */
+	MIPS_CPU_EVA,		/* CPU supports Enhanced Virtual Addressing */
+	MIPS_CPU_HTW,		/* CPU support Hardware Page Table Walker */
+	MIPS_CPU_RIXIEX,	/* CPU has unique exception codes for {Read, Execute}-Inhibit exceptions */
+	MIPS_CPU_MAAR,		/* MAAR(I) registers are present */
+	MIPS_CPU_FRE,		/* FRE & UFE bits implemented */
+	MIPS_CPU_RW_LLB,	/* LLADDR/LLB writes are allowed */
+	MIPS_CPU_LPA,		/* CPU supports Large Physical Addressing */
+	MIPS_CPU_CDMM,		/* CPU has Common Device Memory Map */
+	MIPS_CPU_BP_GHIST,	/* R12K+ Branch Prediction Global History */
+	MIPS_CPU_SP,		/* Small (1KB) page support */
+	MIPS_CPU_FTLB,		/* CPU has Fixed-page-size TLB */
+	MIPS_CPU_NAN_LEGACY,	/* Legacy NaN implemented */
+	MIPS_CPU_NAN_2008,	/* 2008 NaN implemented */
+	MIPS_CPU_VP,		/* MIPSr6 Virtual Processors (multi-threading) */
+	MIPS_CPU_LDPTE,		/* CPU has ldpte/lddir instructions */
+	MIPS_CPU_MVH,		/* CPU supports MFHC0/MTHC0 */
+	MIPS_CPU_EBASE_WG,	/* CPU has EBase.WG */
+	MIPS_CPU_BADINSTR,	/* CPU has BadInstr register */
+	MIPS_CPU_BADINSTRP,	/* CPU has BadInstrP register */
+	MIPS_CPU_CTXTC,		/* CPU has [X]ConfigContext registers */
+	MIPS_CPU_PERF,		/* CPU has MIPS performance counters */
+	MIPS_CPU_GUESTCTL0EXT,	/* CPU has VZ GuestCtl0Ext register */
+	MIPS_CPU_GUESTCTL1,	/* CPU has VZ GuestCtl1 register */
+	MIPS_CPU_GUESTCTL2,	/* CPU has VZ GuestCtl2 register */
+	MIPS_CPU_GUESTID,	/* CPU uses VZ ASE GuestID feature */
+	MIPS_CPU_DRG,		/* CPU has VZ Direct Root to Guest (DRG) */
+	MIPS_CPU_UFR,		/* CPU supports User mode FR switching */
+	MIPS_CPU_SHARED_FTLB_RAM,	/* CPU shares FTLB RAM with another */
+	MIPS_CPU_SHARED_FTLB_ENTRIES,	/* CPU shares FTLB entries with another */
+	MIPS_CPU_MT_PER_TC_PERF_COUNTERS,	/* CPU has perf counters implemented per TC (MIPSMT ASE) */
+	MIPS_CPU_MMID,		/* CPU supports MemoryMapIDs */
+	MIPS_CPU_MM_SYSAD,	/* CPU supports write-through SysAD Valid merge */
+	MIPS_CPU_MM_FULL,	/* CPU supports write-through full merge */
+	MIPS_CPU_MAC_2008_ONLY,	/* CPU Only support MAC2008 Fused multiply-add instruction */
+	MIPS_CPU_FTLBPAREX,	/* CPU has FTLB parity exception */
+	MIPS_CPU_GSEXCEX,	/* CPU has GSExc exception */
+	MIPS_CPU_EXTIMER,	/* CPU has External Timer (Loongson) */
+	MIPS_CPU_OPTS_END
+};
+
+/* Number of unsigned long long options will occupy */
+#define MIPS_CPU_OPTS_ULL_N	(MIPS_CPU_OPTS_END / 64 + 1)
 
 /*
  * CPU ASE encodings
@@ -449,5 +451,7 @@ enum cpu_type_enum {
 #define MIPS_ASE_LOONGSON_CAM	0x00001000 /* Loongson CAM */
 #define MIPS_ASE_LOONGSON_EXT	0x00002000 /* Loongson EXTensions */
 #define MIPS_ASE_LOONGSON_EXT2	0x00004000 /* Loongson EXTensions R2 */
+
+#endif /* !__ASSEMBLY */
 
 #endif /* _ASM_CPU_H */

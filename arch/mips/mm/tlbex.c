@@ -2507,7 +2507,7 @@ static void config_htw_params(void)
 		 * Drop option to avoid HTW being enabled via another path
 		 * (eg htw_reset())
 		 */
-		current_cpu_data.options &= ~MIPS_CPU_HTW;
+		clear_cpu_opt(&current_cpu_data, MIPS_CPU_HTW);
 		return;
 	}
 
