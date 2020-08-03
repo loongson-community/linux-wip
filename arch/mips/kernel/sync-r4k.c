@@ -1,122 +1,101 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Count register synchronisation.
- *
- * All CPUs will have their count registers synchronised to the CPU0 next time
- * value. This can cause a small timewarp for CPU0. All other CPU's should
- * not have done anything significant (but they may have had interrupts
- * enabled briefly - prom_smp_finish() should not be responsible for enabling
- * interrupts...)
  */
 
 #include <linux/kernel.h>
 #include <linux/irqflags.h>
 #include <linux/cpumask.h>
+#include <linux/spinlock.h>
+#include <linux/smp.h>
 
 #include <asm/r4k-timer.h>
 #include <linux/atomic.h>
 #include <asm/barrier.h>
 #include <asm/mipsregs.h>
 
-static unsigned int initcount = 0;
-static atomic_t count_count_start = ATOMIC_INIT(0);
-static atomic_t count_count_stop = ATOMIC_INIT(0);
+#define STAGE_START		0
+#define STAGE_MASTER_READY	1
+#define STAGE_SLAVE_SYNCED	2
 
-#define COUNTON 100
-#define NR_LOOPS 3
+static unsigned int cur_count = 0;
+static unsigned int fini_count = 0;
+static atomic_t sync_stage = ATOMIC_INIT(0);
+static DEFINE_RAW_SPINLOCK(sync_r4k_lock);
 
-void synchronise_count_master(int cpu)
+#define MAX_LOOPS	1000
+
+void synchronise_count_master(void *unused)
 {
-	int i;
 	unsigned long flags;
+	long delta;
+	int i;
 
-	pr_info("Synchronize counters for CPU %u: ", cpu);
+	if (atomic_read(&sync_stage) != STAGE_START)
+		BUG();
 
 	local_irq_save(flags);
 
-	/*
-	 * We loop a few times to get a primed instruction cache,
-	 * then the last pass is more or less synchronised and
-	 * the master and slaves each set their cycle counters to a known
-	 * value all at once. This reduces the chance of having random offsets
-	 * between the processors, and guarantees that the maximum
-	 * delay between the cycle counters is never bigger than
-	 * the latency of information-passing (cachelines) between
-	 * two CPUs.
-	 */
+	cur_count = read_c0_count();
+	smp_wmb();
+	atomic_inc(&sync_stage); /* inc to STAGE_MASTER_READY */
 
-	for (i = 0; i < NR_LOOPS; i++) {
-		/* slaves loop on '!= 2' */
-		while (atomic_read(&count_count_start) != 1)
-			mb();
-		atomic_set(&count_count_stop, 0);
+	for (i = 0; i < MAX_LOOPS; i++) {
+		cur_count = read_c0_count();
 		smp_wmb();
-
-		/* Let the slave writes its count register */
-		atomic_inc(&count_count_start);
-
-		/* Count will be initialised to current timer */
-		if (i == 1)
-			initcount = read_c0_count();
-
-		/*
-		 * Everyone initialises count in the last loop:
-		 */
-		if (i == NR_LOOPS-1)
-			write_c0_count(initcount);
-
-		/*
-		 * Wait for slave to leave the synchronization point:
-		 */
-		while (atomic_read(&count_count_stop) != 1)
-			mb();
-		atomic_set(&count_count_start, 0);
-		smp_wmb();
-		atomic_inc(&count_count_stop);
+		if (atomic_read(&sync_stage) == STAGE_SLAVE_SYNCED)
+			break;
 	}
-	/* Arrange for an interrupt in a short while */
-	write_c0_compare(read_c0_count() + COUNTON);
+
+	delta = read_c0_count() - fini_count;
 
 	local_irq_restore(flags);
 
-	/*
-	 * i386 code reported the skew here, but the
-	 * count registers were almost certainly out of sync
-	 * so no point in alarming people
-	 */
-	pr_cont("done.\n");
+	if (i == MAX_LOOPS)
+		pr_err("sync-r4k: Master: synchronise timeout\n");
+	else
+		pr_info("sync-r4k: Master: synchronise succeed, maxium delta: %ld\n", delta);
+
+	return;
 }
 
 void synchronise_count_slave(int cpu)
 {
 	int i;
 	unsigned long flags;
+	call_single_data_t csd;
+
+	raw_spin_lock(&sync_r4k_lock);
+
+	/* Let variables get attention from cache */
+	for (i = 0; i < MAX_LOOPS; i++) {
+		cur_count++;
+		fini_count += cur_count;
+		cur_count += fini_count;
+	}
+
+	atomic_set(&sync_stage, STAGE_START);
+	csd.func = synchronise_count_master;
+
+	/* Master count is always CPU0 */
+	if (smp_call_function_single_async(0, &csd)) {
+		pr_err("sync-r4k: Salve: Failed to call master\n");
+		raw_spin_unlock(&sync_r4k_lock);
+		return;
+	}
 
 	local_irq_save(flags);
 
-	/*
-	 * Not every cpu is online at the time this gets called,
-	 * so we first wait for the master to say everyone is ready
-	 */
+	/* Wait until master ready */
+	while (atomic_read(&sync_stage) != STAGE_MASTER_READY)
+		cpu_relax();
 
-	for (i = 0; i < NR_LOOPS; i++) {
-		atomic_inc(&count_count_start);
-		while (atomic_read(&count_count_start) != 2)
-			mb();
-
-		/*
-		 * Everyone initialises count in the last loop:
-		 */
-		if (i == NR_LOOPS-1)
-			write_c0_count(initcount);
-
-		atomic_inc(&count_count_stop);
-		while (atomic_read(&count_count_stop) != 2)
-			mb();
-	}
-	/* Arrange for an interrupt in a short while */
-	write_c0_compare(read_c0_count() + COUNTON);
+	write_c0_count(cur_count);
+	fini_count = read_c0_count();
+	smp_wmb();
+	atomic_inc(&sync_stage); /* inc to STAGE_SLAVE_SYNCED */
 
 	local_irq_restore(flags);
+
+	raw_spin_unlock(&sync_r4k_lock);
 }
-#undef NR_LOOPS
