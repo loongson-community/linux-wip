@@ -234,7 +234,6 @@ config BMIPS_GENERIC
 	select USE_OF
 	select CEVT_R4K
 	select CSRC_R4K
-	select SYNC_R4K
 	select COMMON_CLK
 	select BCM6345_L1_IRQ
 	select BCM7038_L1_IRQ
@@ -291,7 +290,6 @@ config BCM63XX
 	select BOOT_RAW
 	select CEVT_R4K
 	select CSRC_R4K
-	select SYNC_R4K
 	select DMA_NONCOHERENT
 	select IRQ_MIPS_CPU
 	select SYS_SUPPORTS_32BIT_KERNEL
@@ -726,7 +724,6 @@ config SGI_IP30
 	select BOOT_ELF64
 	select CEVT_R4K
 	select CSRC_R4K
-	select SYNC_R4K if SMP
 	select ZONE_DMA32
 	select HAVE_PCI
 	select IRQ_MIPS_CPU
@@ -979,7 +976,6 @@ config NLM_XLR_BOARD
 	select CSRC_R4K
 	select IRQ_MIPS_CPU
 	select ZONE_DMA32 if 64BIT
-	select SYNC_R4K
 	select SYS_HAS_EARLY_PRINTK
 	select SYS_SUPPORTS_ZBOOT
 	select SYS_SUPPORTS_ZBOOT_UART16550
@@ -1006,7 +1002,6 @@ config NLM_XLP_BOARD
 	select CSRC_R4K
 	select IRQ_MIPS_CPU
 	select ZONE_DMA32 if 64BIT
-	select SYNC_R4K
 	select SYS_HAS_EARLY_PRINTK
 	select USE_OF
 	select SYS_SUPPORTS_ZBOOT
@@ -1076,6 +1071,7 @@ config CEVT_GT641XX
 	bool
 
 config CEVT_R4K
+	select SYNC_R4K if SMP
 	bool
 
 config CEVT_SB1250
@@ -1091,6 +1087,7 @@ config CSRC_IOASIC
 	bool
 
 config CSRC_R4K
+	select SYNC_R4K if SMP
 	select CLOCKSOURCE_WATCHDOG if CPU_FREQ
 	bool
 
@@ -2361,7 +2358,6 @@ config MIPS_MT_SMP
 	depends on SYS_SUPPORTS_MULTITHREADING && !CPU_MIPSR6 && !CPU_MICROMIPS
 	select CPU_MIPSR2_IRQ_VI
 	select CPU_MIPSR2_IRQ_EI
-	select SYNC_R4K
 	select MIPS_MT
 	select SMP
 	select SMP_UP
@@ -2465,7 +2461,6 @@ config MIPS_CMP
 	bool "MIPS CMP framework support (DEPRECATED)"
 	depends on SYS_SUPPORTS_MIPS_CMP && !CPU_MIPSR6
 	select SMP
-	select SYNC_R4K
 	select SYS_SUPPORTS_SMP
 	select WEAK_ORDERING
 	default n
@@ -2483,7 +2478,6 @@ config MIPS_CPS
 	select MIPS_CM
 	select MIPS_CPS_PM if HOTPLUG_CPU
 	select SMP
-	select SYNC_R4K if (CEVT_R4K || CSRC_R4K)
 	select SYS_SUPPORTS_HOTPLUG_CPU
 	select SYS_SUPPORTS_SCHED_SMT if CPU_MIPSR6
 	select SYS_SUPPORTS_SMP
