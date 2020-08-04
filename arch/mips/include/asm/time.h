@@ -39,30 +39,32 @@ extern int __weak get_c0_perfcount_int(void);
  * Initialize the calling CPU's compare interrupt as clockevent device
  */
 extern unsigned int get_c0_compare_int(void);
-extern int r4k_clockevent_init(void);
 
-static inline int mips_clockevent_init(void)
-{
 #ifdef CONFIG_CEVT_R4K
-	return r4k_clockevent_init();
+extern int r4k_clockevent_init(void);
+extern int r4k_clockevent_percpu_init(int cpu);
 #else
-	return -ENXIO;
-#endif
+static inline int r4k_clockevent_init(void)
+{
+	return -ENODEV;
 }
+static inline int r4k_clockevent_percpu_init(int cpu)
+{
+	return -ENODEV;
+}
+#endif
 
 /*
  * Initialize the count register as a clocksource
  */
-extern int init_r4k_clocksource(void);
-
-static inline int init_mips_clocksource(void)
-{
 #ifdef CONFIG_CSRC_R4K
-	return init_r4k_clocksource();
+extern int init_r4k_clocksource(void);
 #else
-	return 0;
-#endif
+static inline int init_r4k_clocksource(void)
+{
+	return -ENODEV;
 }
+#endif
 
 static inline void clockevent_set_clock(struct clock_event_device *cd,
 					unsigned int clock)

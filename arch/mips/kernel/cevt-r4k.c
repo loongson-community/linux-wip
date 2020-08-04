@@ -294,10 +294,8 @@ core_initcall(r4k_register_cpufreq_notifier);
 
 #endif /* !CONFIG_CPU_FREQ */
 
-int r4k_clockevent_init(void)
+int r4k_clockevent_percpu_init(int cpu)
 {
-	unsigned long flags = IRQF_PERCPU | IRQF_TIMER | IRQF_SHARED;
-	unsigned int cpu = smp_processor_id();
 	struct clock_event_device *cd;
 	unsigned int irq, min_delta;
 
@@ -307,11 +305,6 @@ int r4k_clockevent_init(void)
 	if (!c0_compare_int_usable())
 		return -ENXIO;
 
-	/*
-	 * With vectored interrupts things are getting platform specific.
-	 * get_c0_compare_int is a hook to allow a platform to return the
-	 * interrupt number of its liking.
-	 */
 	irq = get_c0_compare_int();
 
 	cd = &per_cpu(mips_clockevent_device, cpu);
@@ -331,8 +324,29 @@ int r4k_clockevent_init(void)
 
 	clockevents_config_and_register(cd, mips_hpt_frequency, min_delta, 0x7fffffff);
 
+	return 0;
+}
+
+int r4k_clockevent_init(void)
+{
+	int ret;
+	unsigned int irq;
+	unsigned long flags = IRQF_PERCPU | IRQF_TIMER | IRQF_SHARED;
+
+	ret = r4k_clockevent_percpu_init(0);
+	if (ret)
+		return ret;
+
+
 	if (cp0_timer_irq_installed)
 		return 0;
+
+	/*
+	 * With vectored interrupts things are getting platform specific.
+	 * get_c0_compare_int is a hook to allow a platform to return the
+	 * interrupt number of its liking.
+	 */
+	irq = get_c0_compare_int();
 
 	cp0_timer_irq_installed = 1;
 

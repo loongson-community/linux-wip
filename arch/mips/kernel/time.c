@@ -8,6 +8,7 @@
  */
 #include <linux/bug.h>
 #include <linux/clockchips.h>
+#include <linux/cpuhotplug.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -24,6 +25,7 @@
 #include <asm/cpu-features.h>
 #include <asm/cpu-type.h>
 #include <asm/div64.h>
+#include <asm/r4k-timer.h>
 #include <asm/time.h>
 
 #ifdef CONFIG_CPU_FREQ
@@ -155,6 +157,16 @@ static __init int cpu_has_mfc0_count_bug(void)
 	return 0;
 }
 
+#if defined(CONFIG_CEVT_R4K) || defined(CONFIG_CSRC_R4K)
+static int mips_r4k_timer_starting_cpu(unsigned int cpu)
+{
+	synchronise_count_slave(cpu);
+	r4k_clockevent_percpu_init(cpu);
+
+	return 0;
+}
+#endif
+
 void __init time_init(void)
 {
 	plat_time_init();
@@ -167,6 +179,12 @@ void __init time_init(void)
 	 * timer interrupt isn't reliable; the interference doesn't
 	 * matter then, because we don't use the interrupt.
 	 */
-	if (mips_clockevent_init() != 0 || !cpu_has_mfc0_count_bug())
-		init_mips_clocksource();
+	if (r4k_clockevent_init() != 0 || !cpu_has_mfc0_count_bug())
+		init_r4k_clocksource();
+
+#if defined(CONFIG_CEVT_R4K) || defined(CONFIG_CSRC_R4K)
+	cpuhp_setup_state_nocalls(CPUHP_AP_MIPS_R4K_TIMER_STARTING,
+			  "clockevents/mips/r4k/timer:starting",
+			  mips_r4k_timer_starting_cpu, NULL);
+#endif
 }

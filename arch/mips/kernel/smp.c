@@ -337,7 +337,6 @@ asmlinkage void start_secondary(void)
 
 	cpu_probe();
 	per_cpu_trap_init(false);
-	mips_clockevent_init();
 	mp_ops->init_secondary();
 	cpu_report();
 	maar_init();
@@ -357,8 +356,6 @@ asmlinkage void start_secondary(void)
 
 	/* Notify boot CPU that we're starting & ready to sync counters */
 	complete(&cpu_starting);
-
-	synchronise_count_slave(cpu);
 
 	/* The CPU is running and counters synchronised, now mark it online */
 	set_cpu_online(cpu, true);
