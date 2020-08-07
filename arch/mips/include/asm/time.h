@@ -28,6 +28,9 @@ extern void plat_time_init(void);
  */
 extern unsigned int mips_hpt_frequency;
 
+/* True if platform registered sched_clock by itself */
+extern bool plat_have_sched_clock __initdata;
+
 /*
  * The performance counter IRQ on MIPS is a close relative to the timer IRQ
  * so it lives here.

@@ -122,9 +122,8 @@ int __init init_r4k_clocksource(void)
 
 	clocksource_register_hz(&clocksource_mips, mips_hpt_frequency);
 
-#ifndef CONFIG_CPU_FREQ
-	sched_clock_register(r4k_read_sched_clock, 32, mips_hpt_frequency);
-#endif
+	if (!IS_ENABLED(CONFIG_CPU_FREQ) && !plat_have_sched_clock)
+		sched_clock_register(r4k_read_sched_clock, 32, mips_hpt_frequency);
 
 	return 0;
 }

@@ -125,6 +125,9 @@ EXPORT_SYMBOL(perf_irq);
 unsigned int mips_hpt_frequency;
 EXPORT_SYMBOL_GPL(mips_hpt_frequency);
 
+/* True if platform registered sched_clock by itself */
+bool plat_have_sched_clock __initdata = false;
+
 static __init int cpu_has_mfc0_count_bug(void)
 {
 	switch (current_cpu_type()) {
