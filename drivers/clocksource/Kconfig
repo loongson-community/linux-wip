@@ -715,4 +715,14 @@ config MICROCHIP_PIT64B
 	  modes and high resolution. It is used as a clocksource
 	  and a clockevent.
 
+config LOONGSON_CONST_TIMER
+	bool "Loongson Constant Timer"
+	depends on MACH_LOONGSON64
+	default MACH_LOONGSON64
+	help
+	  This option enables Loongson constant timer for Loongson64
+	  systems. It supports the oneshot, the periodic modes and high
+	  resolution. It is used as a clocksource and a clockevent, it is
+	  also accessible in VDSO.
+
 endmenu

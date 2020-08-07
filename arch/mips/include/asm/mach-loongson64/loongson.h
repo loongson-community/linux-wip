@@ -31,6 +31,16 @@ extern void *loongson_fdt_blob;
 extern void mach_irq_dispatch(unsigned int pending);
 extern int mach_i8259_irq(void);
 
+/* Timer functions */
+#ifdef CONFIG_LOONGSON_CONST_TIMER
+extern int __init constant_timer_init(void);
+#else
+static inline int constant_timer_init(void)
+{
+	return -ENODEV;
+}
+#endif
+
 /* We need this in some places... */
 #define delay() ({		\
 	int x;				\
