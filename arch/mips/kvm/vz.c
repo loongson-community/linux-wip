@@ -341,6 +341,12 @@ static bool kvm_vz_should_use_htimer(struct kvm_vcpu *vcpu)
 	if (kvm_mips_count_disabled(vcpu))
 		return false;
 
+	if (cpu_has_extimer) {
+		/* Guest htimer compare interrupt will be ignored if INTIMER is disabled */
+		if (!(read_c0_config6() & LOONGSON_CONF6_INTIMER))
+			return false;
+	}
+
 	/* Chosen frequency must match real frequency */
 	if (mips_hpt_frequency != vcpu->arch.count_hz)
 		return false;
