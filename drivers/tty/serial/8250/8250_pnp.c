@@ -15,6 +15,7 @@
 #include <linux/kernel.h>
 #include <linux/serial_core.h>
 #include <linux/bitops.h>
+#include <linux/property.h>
 
 #include <asm/byteorder.h>
 
@@ -474,7 +475,9 @@ serial_pnp_probe(struct pnp_dev *dev, const struct pnp_device_id *dev_id)
 	uart.port.flags |= UPF_SKIP_TEST | UPF_BOOT_AUTOCONF;
 	if (pnp_irq_flags(dev, 0) & IORESOURCE_IRQ_SHAREABLE)
 		uart.port.flags |= UPF_SHARE_IRQ;
-	uart.port.uartclk = 1843200;
+	if (device_property_read_u32(&dev->dev, "clock-frequency", &uart.port.uartclk)) {
+		uart.port.uartclk = 1843200;
+	}
 	uart.port.dev = &dev->dev;
 
 	line = serial8250_register_8250_port(&uart);
