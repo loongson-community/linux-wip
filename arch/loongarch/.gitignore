@@ -1,0 +1,11 @@
+*.lds
+*.raw
+calc_vmlinuz_load_addr
+elf-entry
+relocs
+vmlinux.*
+vmlinuz.*
+vdso/genvdso
+vdso/vdso-image.c
+
+!kernel/vmlinux.lds.S
