@@ -3,5 +3,5 @@
 # Makefile for LoongArch-specific library files..
 #
 
-lib-y	+= delay.o memcpy.o memset.o \
-	   strncpy_user.o strnlen_user.o dump_tlb.o
+lib-y	+= delay.o memset.o memcpy.o memmove.o clear_user.o \
+	   copy_user.o strncpy_user.o strnlen_user.o dump_tlb.o
