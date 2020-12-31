@@ -8,6 +8,7 @@
 #include <linux/pci.h>
 #include <linux/vgaarb.h>
 
+#include <asm/numa.h>
 #include <loongson.h>
 
 #define PCI_ACCESS_READ  0
@@ -17,6 +18,7 @@ static int ls7a_pci_config_access(unsigned char access_type,
 		struct pci_bus *bus, unsigned int devfn,
 		int where, u32 *data)
 {
+	int node = pcibus_to_node(bus);
 	unsigned char busnum = bus->number;
 	int device = PCI_SLOT(devfn);
 	int function = PCI_FUNC(devfn);
@@ -29,7 +31,7 @@ static int ls7a_pci_config_access(unsigned char access_type,
 	 * device 2: misc, device 21: confbus
 	 */
 	if (where < PCI_CFG_SPACE_SIZE) { /* standard config */
-		addr = (busnum << 16) | (device << 11) | (function << 8) | reg;
+		addr = nid_to_addrbase(node) | (busnum << 16) | (device << 11) | (function << 8) | reg;
 		if (busnum == 0) {
 			if (device > 23 || (device >= 9 && device <= 20 && function == 1))
 				return PCIBIOS_DEVICE_NOT_FOUND;
@@ -39,7 +41,7 @@ static int ls7a_pci_config_access(unsigned char access_type,
 		}
 	} else if (where < PCI_CFG_SPACE_EXP_SIZE) {  /* extended config */
 		reg = (reg & 0xff) | ((reg & 0xf00) << 16);
-		addr = (busnum << 16) | (device << 11) | (function << 8) | reg;
+		addr = nid_to_addrbase(node) | (busnum << 16) | (device << 11) | (function << 8) | reg;
 		if (busnum == 0) {
 			if (device > 23 || (device >= 9 && device <= 20 && function == 1))
 				return PCIBIOS_DEVICE_NOT_FOUND;
@@ -113,6 +115,41 @@ struct pci_ops ls7a_pci_ops = {
 	.read = ls7a_pci_pcibios_read,
 	.write = ls7a_pci_pcibios_write
 };
+
+static void pci_root_fix_resbase(struct pci_dev *dev)
+{
+	struct resource *res;
+	struct resource_entry *entry, *tmp;
+
+	resource_list_for_each_entry_safe(entry, tmp, &dev->bus->resources) {
+		res = entry->res;
+
+		if (res->flags & IORESOURCE_MEM) {
+			res->start &= GENMASK_ULL(40, 0);
+			res->end   &= GENMASK_ULL(40, 0);
+		}
+	}
+}
+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_LOONGSON, PCI_DEVICE_ID_LOONGSON_HOST, pci_root_fix_resbase);
+
+static void pci_device_fix_resbase(struct pci_dev *dev)
+{
+	int i, node = pcibus_to_node(dev->bus);
+
+	for (i = 0; i < PCI_NUM_RESOURCES; i++) {
+		struct resource *r = &dev->resource[i];
+
+		if (!node && (r->flags & IORESOURCE_IO))
+			continue;
+
+		if (r->flags & (IORESOURCE_MEM | IORESOURCE_IO)) {
+			r->start |= nid_to_addrbase(node) | HT1LO_OFFSET;
+			r->end   |= nid_to_addrbase(node) | HT1LO_OFFSET;
+		}
+
+	}
+}
+DECLARE_PCI_FIXUP_ENABLE(PCI_ANY_ID, PCI_ANY_ID, pci_device_fix_resbase);
 
 static void pci_fixup_vgadev(struct pci_dev *pdev)
 {

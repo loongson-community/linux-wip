@@ -130,7 +130,11 @@ void __init platform_init(void)
 #endif
 	loongarch_pci_ops = &ls7a_pci_ops;
 
+#ifndef CONFIG_NUMA
 	fw_init_memory();
+#else
+	fw_init_numa_memory();
+#endif
 	dmi_setup();
 	smbios_parse();
 	pr_info("The BIOS Version: %s\n", b_info.bios_version);

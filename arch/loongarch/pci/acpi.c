@@ -11,6 +11,7 @@
 #include <linux/pci-acpi.h>
 
 #include <asm/pci.h>
+#include <asm/numa.h>
 #include <loongson.h>
 
 struct pci_root_info {
@@ -115,7 +116,7 @@ static void init_controller_resources(struct pci_controller *controller,
 	struct resource_entry *entry, *tmp;
 	struct resource *res;
 
-	controller->io_map_base = loongarch_io_port_base;
+	controller->io_map_base = loongarch_io_port_base | nid_to_addrbase(controller->node);
 
 	resource_list_for_each_entry_safe(entry, tmp, &bus->resources) {
 		res = entry->res;
@@ -155,7 +156,7 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_root *root)
 	if (!controller->mcfg_addr)
 		controller->mcfg_addr = mcfg_addr_init(controller->index);
 
-	controller->node = 0;
+	controller->node = pa_to_nid(controller->mcfg_addr);
 
 	bus = pci_find_bus(domain, busnum);
 	if (bus) {

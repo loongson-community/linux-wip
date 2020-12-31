@@ -35,4 +35,16 @@ extern unsigned long initrd_start, initrd_end;
  */
 extern void plat_mem_setup(void);
 
+#ifdef CONFIG_SWIOTLB
+/*
+ * Optional platform hook to call swiotlb_setup().
+ */
+extern void plat_swiotlb_setup(void);
+
+#else
+
+static inline void plat_swiotlb_setup(void) {}
+
+#endif /* CONFIG_SWIOTLB */
+
 #endif /* _ASM_BOOTINFO_H */
