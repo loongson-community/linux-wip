@@ -432,6 +432,10 @@ typedef struct elf64_shdr {
 #define NT_MIPS_DSP	0x800		/* MIPS DSP ASE registers */
 #define NT_MIPS_FP_MODE	0x801		/* MIPS floating-point mode */
 #define NT_MIPS_MSA	0x802		/* MIPS SIMD registers */
+#define NT_LOONGARCH_CPUCFG	0x900	/* LoongArch CPU config registers */
+#define NT_LOONGARCH_LBT	0x901	/* LoongArch Loongson Binary Translation registers */
+#define NT_LOONGARCH_LSX	0x902	/* LoongArch Loongson SIMD Extension registers */
+#define NT_LOONGARCH_LASX	0x903	/* LoongArch Loongson Advanced SIMD Extension registers */
 
 /* Note types with note name "GNU" */
 #define NT_GNU_PROPERTY_TYPE_0	5
