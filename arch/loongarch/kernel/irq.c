@@ -34,6 +34,7 @@ atomic_t irq_err_count;
 
 int arch_show_interrupts(struct seq_file *p, int prec)
 {
+	show_ipi_list(p, prec);
 	seq_printf(p, "%*s: %10u\n", prec, "ERR", atomic_read(&irq_err_count));
 	return 0;
 }

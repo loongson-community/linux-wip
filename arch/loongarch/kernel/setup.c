@@ -26,6 +26,7 @@
 #include <asm/dma.h>
 #include <asm/sections.h>
 #include <asm/setup.h>
+#include <asm/smp.h>
 
 struct cpuinfo_loongarch cpu_data[NR_CPUS] __read_mostly;
 
@@ -379,6 +380,29 @@ static void __init resource_init(void)
 	}
 }
 
+#ifdef CONFIG_SMP
+static void __init prefill_possible_map(void)
+{
+	int i, possible;
+
+	possible = num_processors + disabled_cpus;
+	if (possible > nr_cpu_ids)
+		possible = nr_cpu_ids;
+
+	pr_info("SMP: Allowing %d CPUs, %d hotplug CPUs\n",
+			possible, max((possible - num_processors), 0));
+
+	for (i = 0; i < possible; i++)
+		set_cpu_possible(i, true);
+	for (; i < NR_CPUS; i++)
+		set_cpu_possible(i, false);
+
+	nr_cpu_ids = possible;
+}
+#else
+static inline void prefill_possible_map(void) {}
+#endif
+
 void __init setup_arch(char **cmdline_p)
 {
 	cpu_probe();
@@ -403,6 +427,8 @@ void __init setup_arch(char **cmdline_p)
 	arch_mem_init(cmdline_p);
 
 	resource_init();
+	plat_smp_setup();
+	prefill_possible_map();
 
 	cpu_cache_init();
 	paging_init();

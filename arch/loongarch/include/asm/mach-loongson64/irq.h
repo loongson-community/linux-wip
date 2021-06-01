@@ -74,4 +74,7 @@ extern struct fwnode_handle *acpi_liointc_handle;
 extern struct fwnode_handle *acpi_msidomain_handle;
 extern struct fwnode_handle *acpi_picdomain_handle[MAX_PCH_PICS];
 
+extern void fixup_irqs(void);
+extern void loongson3_ipi_interrupt(int irq);
+
 #endif /* __ASM_MACH_LOONGSON64_IRQ_H_ */

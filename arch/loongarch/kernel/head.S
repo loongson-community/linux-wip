@@ -65,3 +65,22 @@ SYM_CODE_START(kernel_entry)			# kernel entry point
 	b		start_kernel
 
 SYM_CODE_END(kernel_entry)
+
+#ifdef CONFIG_SMP
+
+/*
+ * SMP slave cpus entry point.	Board specific code for bootstrap calls this
+ * function after setting up the stack and tp registers.
+ */
+SYM_CODE_START(smpboot_entry)
+	li.d		t0, CSR_DMW0_INIT	# UC, PLV0
+	csrwr		t0, LOONGARCH_CSR_DMWIN0
+	li.d		t0, CSR_DMW1_INIT	# CA, PLV0
+	csrwr		t0, LOONGARCH_CSR_DMWIN1
+	li.w		t0, 0xb0		# PLV=0, IE=0, PG=1
+	csrwr		t0, LOONGARCH_CSR_CRMD
+
+	b		start_secondary
+SYM_CODE_END(smpboot_entry)
+
+#endif /* CONFIG_SMP */

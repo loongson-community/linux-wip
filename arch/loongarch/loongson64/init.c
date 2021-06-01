@@ -13,6 +13,7 @@
 #include <asm/cacheflush.h>
 #include <asm/efi.h>
 #include <asm/fw.h>
+#include <asm/smp.h>
 #include <asm/time.h>
 
 #include <loongson.h>
@@ -135,4 +136,6 @@ void __init platform_init(void)
 	pr_info("The BIOS Version: %s\n", b_info.bios_version);
 
 	efi_runtime_init();
+
+	register_smp_ops(&loongson3_smp_ops);
 }
